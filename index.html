@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy Clone</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Login Screen -->
+        <section id="login-screen" class="screen active">
+            <div class="login-container">
+                <h1>Local Jeopardy Login</h1>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="login-username" placeholder="Username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="Password">
+                </div>
+                <div class="form-actions">
+                    <button id="login-btn" class="btn btn-primary">Login</button>
+                    <button id="register-btn" class="btn">Register</button>
+                </div>
+                <div id="login-message" class="message"></div>
+            </div>
+        </section>
+
+        <!-- Setup Screen -->
+        <section id="setup-screen" class="screen hidden">
+            <div class="setup-container">
+                <h1>Game Setup</h1>
+
+                <div class="config-group">
+                    <label>How many players?</label>
+                    <div class="player-count-controls">
+                        <button class="btn" id="dec-players">-</button>
+                        <span id="player-count-display">3</span>
+                        <button class="btn" id="inc-players">+</button>
+                    </div>
+                </div>
+
+                <div id="player-configs" class="player-configs-grid">
+                    <!-- Player config cards injected here -->
+                </div>
+
+                <div class="config-group">
+                    <label>Select Game Set</label>
+                    <select id="game-set-select">
+                        <option value="0">Game 1 (General Knowledge)</option>
+                        <option value="1">Game 2 (Science & Tech)</option>
+                        <option value="2">Game 3 (History & Geography)</option>
+                        <option value="3">Game 4 (Pop Culture)</option>
+                    </select>
+                </div>
+
+                <button id="start-game-btn" class="btn btn-primary btn-large">Start Game</button>
+            </div>
+        </section>
+
+        <!-- Main Game Board -->
+        <section id="game-screen" class="screen hidden">
+            <header class="game-header">
+                <div class="round-indicator" id="round-indicator">Jeopardy!</div>
+                <div class="logo">JEOPARDY</div>
+            </header>
+
+            <div id="board" class="board-grid">
+                <!-- Categories and Clues injected here -->
+            </div>
+
+            <div id="podiums" class="podiums-container">
+                <!-- Player Podiums injected here -->
+            </div>
+        </section>
+
+        <!-- Question Modal -->
+        <div id="question-modal" class="modal hidden">
+            <div class="modal-content">
+                <div id="question-category" class="question-category">CATEGORY</div>
+                <div id="question-value" class="question-value">$200</div>
+                <div id="question-text" class="question-text">Question text goes here...</div>
+
+                <div id="timer-bar-container">
+                    <div id="timer-bar"></div>
+                </div>
+
+                <div id="answer-options" class="answers-grid hidden">
+                    <!-- Multiple choice buttons -->
+                </div>
+
+                <div id="buzzer-status" class="buzzer-status hidden">
+                    Waiting for players to buzz...
+                </div>
+            </div>
+        </div>
+
+        <!-- Feedback Modal (Correct/Incorrect) -->
+        <div id="feedback-modal" class="modal hidden">
+            <div class="modal-content feedback-content">
+                <h2 id="feedback-text">Correct!</h2>
+                <div id="feedback-score-update">+ $200</div>
+            </div>
+        </div>
+
+        <!-- Final Jeopardy Wager -->
+        <section id="final-wager-screen" class="screen hidden">
+            <div class="wager-container">
+                <h1>Final Jeopardy</h1>
+                <h2 id="final-category">Category</h2>
+                <p>Place your wagers!</p>
+                <div id="wager-inputs">
+                    <!-- Inputs for each player -->
+                </div>
+                <button id="start-final-btn" class="btn btn-primary">Start Final Question</button>
+            </div>
+        </section>
+
+    </div>
+    <script src="questions.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
