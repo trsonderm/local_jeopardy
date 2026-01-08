@@ -275,31 +275,35 @@ function openQuestion(clue, id) {
         dom.buzzerStatus.classList.remove('active');
         dom.buzzerStatus.style.color = "#0f0";
         document.getElementById('answer-options').classList.remove('hidden'); // Show answers
-        startTimer(5000);
+        startTimer(QUESTION_TIMER_MS);
     }, 2000);
+
 }
+
+
+const QUESTION_TIMER_MS = 5000;
+const ANSWER_TIMER_MS = 10000;
 
 function startTimer(duration) {
     state.buzzStartTime = Date.now();
     state.remainingBuzzTime = duration;
 
     // Visual: Set bar to current percentage immediately
-    const pct = (duration / 5000) * 100;
+    const pct = (state.remainingBuzzTime / QUESTION_TIMER_MS) * 100;
+
     dom.timerBar.style.transition = 'none';
     dom.timerBar.style.width = `${pct}%`;
-
-    // Force reflow
-    dom.timerBar.offsetHeight;
+    dom.timerBar.offsetHeight; // Force reflow
 
     // Animate to 0
-    dom.timerBar.style.transition = `width ${duration}ms linear`;
+    dom.timerBar.style.transition = `width ${state.remainingBuzzTime}ms linear`;
     dom.timerBar.style.width = '0%';
 
     clearTimeout(buzzTimer);
     buzzTimer = setTimeout(() => {
         // Time up!
         closeQuestion(false);
-    }, duration);
+    }, state.remainingBuzzTime);
 }
 
 function handleGameKey(e) {
@@ -314,22 +318,23 @@ function handleGameKey(e) {
         state.buzzedPlayer = pIdx;
         state.isBuzzingLocked = true;
 
-        // Pause timer visual (hacky, just stop reset)
+        // Pause timer
         clearTimeout(buzzTimer);
         const elapsed = Date.now() - state.buzzStartTime;
         state.remainingBuzzTime = Math.max(0, state.remainingBuzzTime - elapsed);
 
         // Visuals
         dom.timerBar.style.transition = 'none';
-        dom.timerBar.style.width = '100%'; // Full bar for answer timer
+        // Freeze bar at current width so it doesn't jump to 100% yet
+        const pct = (state.remainingBuzzTime / QUESTION_TIMER_MS) * 100;
+        dom.timerBar.style.width = `${pct}%`;
 
-        // Visuals
         dom.buzzerStatus.innerText = `${state.players[pIdx].name} Buzzed!`;
         dom.buzzerStatus.classList.add('active');
         document.getElementById(`podium-${pIdx}`).classList.add('active');
 
-        // Show options (enable them)
-        document.getElementById('answer-options').classList.remove('hidden'); // Ensure visible
+        // Show options
+        document.getElementById('answer-options').classList.remove('hidden');
         document.querySelectorAll('.answer-btn').forEach(btn => btn.disabled = false);
 
         startAnswerTimer();
@@ -339,15 +344,20 @@ function handleGameKey(e) {
 function startAnswerTimer() {
     clearTimeout(state.answerTimer);
 
-    // Visual: Animate bar to 0 over 10s
-    dom.timerBar.style.transition = 'width 10s linear';
+    // Visual: Jump to full for answer timer
+    dom.timerBar.style.transition = 'none';
+    dom.timerBar.style.width = '100%';
+    dom.timerBar.offsetHeight; // Force reflow
+
+    // Animate to 0 over 10s
+    dom.timerBar.style.transition = `width ${ANSWER_TIMER_MS}ms linear`;
     dom.timerBar.style.width = '0%';
 
     state.answerTimer = setTimeout(() => {
         if (state.buzzedPlayer !== null) {
             handleIncorrect(state.players[state.buzzedPlayer], state.currentQuestion.value, true);
         }
-    }, 10000); // 10s to answer
+    }, ANSWER_TIMER_MS);
 }
 
 function handleAnswer(answerIdx) {
@@ -388,23 +398,24 @@ function handleIncorrect(player, value, timeout = false) {
     showFeedback(txt, -value);
 
     // Rebound Logic
-    // If all players have attempted, close question.
-    // Else, re-open buzzer for others.
-
-    // Check if any eligible players remain
-    // Eligible = not in attemptedPlayers AND score > -something ? (Standard rules: anyone can play)
     const survivors = state.players.filter(p => !state.attemptedPlayers.has(p.id));
 
     if (survivors.length === 0) {
-        closeQuestion(true);
+        // Delay closure slightly to show feedback
+        setTimeout(() => closeQuestion(true), 1500);
     } else {
-        // Resume play
-        dom.buzzerStatus.innerText = "GO!";
-        dom.buzzerStatus.classList.remove('active');
-        state.isBuzzingLocked = false;
+        // Resume play after feedback delay
+        setTimeout(() => {
+            // Check if modal is still open (might be closed by something else?)
+            if (dom.modal.classList.contains('hidden')) return;
 
-        // Resume timer
-        startTimer(state.remainingBuzzTime);
+            dom.buzzerStatus.innerText = "GO!";
+            dom.buzzerStatus.classList.remove('active');
+            state.isBuzzingLocked = false;
+
+            // Resume timer
+            startTimer(state.remainingBuzzTime);
+        }, 1500); // 1.5s delay matched with feedback visibility roughly
     }
 }
 

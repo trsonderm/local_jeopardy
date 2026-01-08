@@ -10,7 +10,13 @@ echo "=== Starting Deployment ==="
 # 1. Update Code
 echo "Pulling latest changes from git..."
 if [ -d ".git" ]; then
-    git pull
+    # Stash any local changes to avoid conflicts
+    if [ -n "$(git status --porcelain)" ]; then
+        echo "Stashing local changes..."
+        git stash
+    fi
+    
+    git pull origin main
 else
     echo "Error: Not a git repository."
     exit 1
